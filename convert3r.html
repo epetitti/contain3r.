@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decimal & Fraction Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .result {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .decimal-field {
+            width: 300px; /* Width for the decimal input */
+        }
+        .fraction-field {
+            width: 300px; /* Width for the fraction input */
+        }
+        .operation-field {
+            width: 150px; /* Width for the operation selection */
+        }
+    </style>
+</head>
+<body>
+    <h1>iARTS 1SS3 Imperial Unit Decimal & Fraction Converter</h1>
+
+    <h2>Convert Decimal to Fraction</h2>
+    <input type="number" id="decimalInput" class="decimal-field" placeholder="Enter a decimal" step="0.01">
+    <button onclick="convertDecimalToFraction()">Convert</button>
+    <p id="fractionOutput" class="result"></p>
+    <br><br>
+
+    <h2>Convert Fraction to Decimal</h2>
+    <input type="text" id="fractionInput" class="fraction-field" placeholder="Enter a fraction (e.g., 1/2)">
+    <button onclick="convertFractionToDecimal()">Convert</button>
+    <p id="decimalOutput" class="result"></p>
+    <br><br>
+
+    <h2>Add/Subtract Fractions</h2>
+    <input type="text" id="fraction1" class="fraction-field" placeholder="Enter first fraction (e.g., 1/2)">
+    <input type="text" id="fraction2" class="fraction-field" placeholder="Enter second fraction (e.g., 1/4)">
+    <select id="operation" class="operation-field">
+        <option value="add">Add</option>
+        <option value="subtract">Subtract</option>
+    </select>
+    <button onclick="calculateFraction()">Calculate</button>
+    <p id="calculationOutput" class="result"></p>
+
+    <script>
+        function gcd(a, b) {
+            return b ? gcd(b, a % b) : a;
+        }
+
+        function convertDecimalToFraction() {
+            let decimal = parseFloat(document.getElementById("decimalInput").value);
+            if (isNaN(decimal)) {
+                document.getElementById("fractionOutput").innerText = "Please enter a valid decimal.";
+                return;
+            }
+
+            if (decimal % 1 === 0) {
+                document.getElementById("fractionOutput").innerText = `Fraction: ${decimal}/1`;
+                return;
+            }
+
+            let wholeNumber = Math.floor(decimal);
+            let fractionPart = decimal - wholeNumber;
+
+            let len = fractionPart.toString().length - 2;
+            let denominator = Math.pow(10, len);
+            let numerator = fractionPart * denominator;
+
+            let divisor = gcd(numerator, denominator);
+
+            numerator /= divisor;
+            denominator /= divisor;
+
+            if (wholeNumber === 0) {
+                document.getElementById("fractionOutput").innerText = `Fraction: ${Math.floor(numerator)}/${Math.floor(denominator)}`;
+            } else {
+                document.getElementById("fractionOutput").innerText = `Fraction: ${wholeNumber} ${Math.floor(numerator)}/${Math.floor(denominator)}`;
+            }
+        }
+
+        function convertFractionToDecimal() {
+            let fraction = document.getElementById("fractionInput").value;
+            let wholeNumber = 0;
+
+            // Check if the fraction includes a whole number
+            if (fraction.includes(' ')) {
+                const parts = fraction.split(' ');
+                wholeNumber = parseInt(parts[0]);
+                fraction = parts[1];
+            }
+
+            const [numerator, denominator] = fraction.split('/').map(Number);
+            if (isNaN(numerator) || isNaN(denominator)) {
+                document.getElementById("decimalOutput").innerText = "Please enter a valid fraction.";
+                return;
+            }
+
+            const decimal = (numerator / denominator) + wholeNumber;
+            document.getElementById("decimalOutput").innerText = `Decimal: ${decimal.toFixed(4)}`;
+        }
+
+        function calculateFraction() {
+            let fraction1 = document.getElementById("fraction1").value;
+            let fraction2 = document.getElementById("fraction2").value;
+            const operation = document.getElementById("operation").value;
+
+            let [numerator1, denominator1] = fraction1.split('/').map(Number);
+            let [numerator2, denominator2] = fraction2.split('/').map(Number);
+
+            if (isNaN(numerator1) || isNaN(denominator1) || isNaN(numerator2) || isNaN(denominator2)) {
+                document.getElementById("calculationOutput").innerText = "Please enter valid fractions.";
+                return;
+            }
+
+            let commonDenominator = denominator1 * denominator2;
+            let adjustedNumerator1 = numerator1 * denominator2;
+            let adjustedNumerator2 = numerator2 * denominator1;
+
+            let resultNumerator;
+            if (operation === "add") {
+                resultNumerator = adjustedNumerator1 + adjustedNumerator2;
+            } else if (operation === "subtract") {
+                resultNumerator = adjustedNumerator1 - adjustedNumerator2;
+            }
+
+            const divisor = gcd(resultNumerator, commonDenominator);
+
+            document.getElementById("calculationOutput").innerText = `Result: ${(resultNumerator / divisor)}/${(commonDenominator / divisor)}`;
+        }
+    </script>
+</body>
+</html>
